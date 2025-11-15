@@ -58,6 +58,30 @@ public class StatementPrinter {
     }
 
     /**
+     * Calculates the total volume credits for all performances.
+     * @return the total volume credits
+     */
+    private int getTotalVolumeCredits() {
+        int result = 0;
+        for (Performance performance : invoice.getPerformances()) {
+            result += getVolumeCredits(performance);
+        }
+        return result;
+    }
+
+    /**
+     * Calculates the total amount for all performances.
+     * @return the total amount
+     */
+    private int getTotalAmount() {
+        int result = 0;
+        for (Performance performance : invoice.getPerformances()) {
+            result += getAmount(performance);
+        }
+        return result;
+    }
+
+    /**
      * Calculates the amount for a given performance.
      * @param performance the performance
      * @return the calculated amount
@@ -95,24 +119,17 @@ public class StatementPrinter {
      * @throws RuntimeException if one of the play types is not known
      */
     public String statement() {
-        int totalAmount = 0;
-        int volumeCredits = 0;
         final StringBuilder result = 
             new StringBuilder("Statement for " + invoice.getCustomer() + System.lineSeparator());
-
         for (Performance performance : invoice.getPerformances()) {
             final Play play = getPlay(performance);
-
-            // add volume credits
-            volumeCredits += getVolumeCredits(performance);
 
             // print line for this order
             result.append(String.format("  %s: %s (%s seats)%n", play.getName(),
                     usd(getAmount(performance)), performance.getAudience()));
-            totalAmount += getAmount(performance);
         }
-        result.append(String.format("Amount owed is %s%n", usd(totalAmount)));
-        result.append(String.format("You earned %s credits%n", volumeCredits));
+        result.append(String.format("Amount owed is %s%n", usd(getTotalAmount())));
+        result.append(String.format("You earned %s credits%n", getTotalVolumeCredits()));
         return result.toString();
     }
 }
